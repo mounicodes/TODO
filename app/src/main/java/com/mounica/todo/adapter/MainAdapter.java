@@ -9,13 +9,17 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
 import com.mounica.todo.DatabaseManager;
 import com.mounica.todo.R;
 import com.mounica.todo.models.Todo;
+import com.mounica.todo.utils.Events.onDeleteTask;
 import com.mounica.todo.views.InputActivity;
-import com.mounica.todo.views.MainActivity;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * Recyclerview adapter that loads/updates data in the view
@@ -72,7 +76,7 @@ public class MainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             public void onDelete(int position) {
                 // Delete from DB and update the view
                 mDatabaseManager.delete(mTodoList.get(position));
-                deleteItem(mTodoList.get(position));
+                EventBus.getDefault().post(new onDeleteTask(mTodoList.get(position)));
             }
 
             @Override

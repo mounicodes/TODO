@@ -9,12 +9,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager.LayoutParams;
 import android.widget.EditText;
 
 import com.mounica.todo.DatabaseManager;
 import com.mounica.todo.R;
 import com.mounica.todo.models.Todo;
-import com.mounica.todo.utils.Events.onCreateTask;
 import com.mounica.todo.utils.Events.onDeleteTask;
 import com.mounica.todo.utils.Events.onUpdateTask;
 
@@ -25,9 +25,15 @@ import org.greenrobot.eventbus.EventBus;
  */
 public class InputActivity extends AppCompatActivity {
 
+    public static final int OPERATION_TYPE_CREATE = 1;
+    public static final int OPERATION_TYPE_DELETE = 2;
+    public static final int OPERATION_TYPE_UPDATE = 3;
+
+    public static final int EXTRA_OPERATION_TYPE_UPDATE = OPERATION_TYPE_UPDATE;
+
     public static final String EXTRA_OPERATION_TYPE = "type";
-    public static final String EXTRA_OPERATION_TYPE_UPDATE = "update";
     public static final String EXTRA_TODO = "todo";
+
     public static final String ALERT_YES = "yes";
     public static final String ALERT_NO = "no";
 
@@ -50,10 +56,13 @@ public class InputActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        // Show Soft keyboard as soon as activity loads
         mInput = findViewById(R.id.edit_input);
+        mInput.requestFocus();
+        getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
         mIsUpdate = false;
-        if (getIntent().getStringExtra(EXTRA_OPERATION_TYPE).equals(EXTRA_OPERATION_TYPE_UPDATE)) {
+        if (getIntent().getIntExtra(EXTRA_OPERATION_TYPE, -1) == EXTRA_OPERATION_TYPE_UPDATE) {
             mIsUpdate = true;
             mTodo = (Todo) getIntent().getSerializableExtra(EXTRA_TODO);
             mInput.setText(mTodo.getText());
@@ -129,6 +138,19 @@ public class InputActivity extends AppCompatActivity {
 
     // Show an alert dialog when back button is pressed save/discard the text accordingly
     private void showAlert() {
+
+        // Figure out what operation is going on
+        final int operationType;
+        if (mIsUpdate) {
+            if (mInput.getText().toString().length() == 0) {
+                operationType = OPERATION_TYPE_DELETE;
+            } else {
+                operationType = OPERATION_TYPE_UPDATE;
+            }
+        } else {
+            operationType = OPERATION_TYPE_CREATE;
+        }
+
         new AlertDialog.Builder(this)
                 .setNegativeButton(ALERT_NO,
                         new OnClickListener() {
@@ -141,19 +163,22 @@ public class InputActivity extends AppCompatActivity {
                         new OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                if (mIsUpdate) {
-                                    if (mInput.getText().toString().length() == 0) {
+                                switch (operationType) {
+                                    case OPERATION_TYPE_CREATE:
+                                        createTodo();
+                                        break;
+                                    case OPERATION_TYPE_DELETE:
                                         deleteTodo();
-                                    } else {
+                                        break;
+                                    case OPERATION_TYPE_UPDATE:
                                         updateTodo();
-                                    }
-                                } else {
-                                    createTodo();
+                                        break;
+                                    default:
                                 }
                                 InputActivity.super.onBackPressed();
                             }
                         })
-                .setTitle(R.string.alert_to_save)
+                .setTitle(operationType == OPERATION_TYPE_DELETE ? R.string.alert_to_delete : R.string.alert_to_save)
                 .create()
                 .show();
     }
@@ -163,9 +188,8 @@ public class InputActivity extends AppCompatActivity {
         String title = mInput.getText().toString().split("\\s|\\n", 2)[0];
         Todo todo = new Todo(title, mInput.getText().toString());
 
-        // Create in DB and post event to Main Activity
+        // Create in DB
         mDatabaseManager.create(todo);
-        EventBus.getDefault().post(new onCreateTask(todo));
     }
 
     public void updateTodo() {

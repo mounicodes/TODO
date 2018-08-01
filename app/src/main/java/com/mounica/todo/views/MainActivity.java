@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent newTodoIntent = new Intent(view.getContext(), InputActivity.class);
-                newTodoIntent.putExtra("type", "create");
+                newTodoIntent.putExtra(InputActivity.EXTRA_OPERATION_TYPE, InputActivity.OPERATION_TYPE_CREATE);
                 startActivity(newTodoIntent);
             }
         });

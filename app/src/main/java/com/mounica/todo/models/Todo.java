@@ -72,4 +72,9 @@ public class Todo implements Serializable {
 
         return thatTodo.index == index;
     }
+
+    @Override
+    public String toString() {
+        return "Todo: index=" + index + " title=" + title + " text=" + text;
+    }
 }

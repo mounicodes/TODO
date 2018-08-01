@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 
 import com.google.common.base.Preconditions;
 
+import com.mounica.todo.utils.Events.onCreateTask;
 import com.mounica.todo.utils.Events.onDataLoad;
 import com.mounica.todo.models.Todo;
 
@@ -53,23 +54,25 @@ public class DatabaseManager {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                TodoApplication.getMyDatabase().todoDao().createTodoTask(todo);
+                long id = TodoApplication.getMyDatabase().todoDao().createTodoTask(todo);
+                todo.setIndex((int) id);
+                EventBus.getDefault().post(new onCreateTask(todo));
             }
         });
     }
 
-    // Updates todoitem in the database and posts an event
+    // Updates todoitem in the database
     public void update(@NonNull final Todo todo) {
         Preconditions.checkNotNull(todo);
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                TodoApplication.getMyDatabase().todoDao().createTodoTask(todo);
+                TodoApplication.getMyDatabase().todoDao().updateTodoTask(todo);
             }
         });
     }
 
-    // Deletes todoitem in the database and posts an event
+    // Deletes todoitem in the database
     public void delete(@NonNull final Todo todo) {
         Preconditions.checkNotNull(todo);
         mHandler.post(new Runnable() {
