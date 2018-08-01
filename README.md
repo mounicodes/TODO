@@ -11,4 +11,4 @@ Phase # | Description | Status
 2|Set Alarm | To be done
 ## Demo:
 ------------
-
+![](Todo.gif)
