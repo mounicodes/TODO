@@ -2,74 +2,81 @@ package com.mounica.todo;
 
 import android.os.Handler;
 import android.os.HandlerThread;
-import com.mounica.todo.utils.Events;
+import android.support.annotation.NonNull;
+
+import com.google.common.base.Preconditions;
+
 import com.mounica.todo.utils.Events.onDataLoad;
 import com.mounica.todo.models.Todo;
-import java.util.List;
+
 import org.greenrobot.eventbus.EventBus;
+
+/**
+ * Singleton Database Manager that performs Create/Update/Delete operations on the database table in a worker thread
+ * and posts the events to the respective subscribers.
+ */
 
 public class DatabaseManager {
 
-  private static final String TAG = "DatabaseManager";
-  private static DatabaseManager sDatabaseManager;
-  private HandlerThread mWorkerThread;
-  private Handler mHandler;
+    private static final String THREAD_NAME = "database_worker";
+    private static DatabaseManager sDatabaseManager;
 
-  public static DatabaseManager getInstance() {
-    if (sDatabaseManager == null) {
-      sDatabaseManager = new DatabaseManager();
+    private HandlerThread mWorkerThread;
+    private Handler mHandler;
+
+    public static DatabaseManager getInstance() {
+        if (sDatabaseManager == null) {
+            sDatabaseManager = new DatabaseManager();
+        }
+        return sDatabaseManager;
     }
-    return sDatabaseManager;
-  }
 
-  private DatabaseManager() {
-    mWorkerThread = new HandlerThread("worker");
-    mWorkerThread.start();
-    mHandler = new Handler(mWorkerThread.getLooper());
-  }
+    private DatabaseManager() {
+        mWorkerThread = new HandlerThread(THREAD_NAME);
+        mWorkerThread.start();
+        mHandler = new Handler(mWorkerThread.getLooper());
+    }
 
-  public void performQuery() {
-    Runnable runnable = new Runnable() {
-      @Override
-      public void run() {
-        List<Todo> todoList = TodoApplication.getMyDatabase().todoDao().getAll();
-        Events.onDataLoad onDataLoad = new onDataLoad(todoList);
-        EventBus.getDefault().post(onDataLoad);
-      }
-    };
-    mHandler.post(runnable);
-  }
+    // Performs Database query to read all the todoitems and posts an event
+    public void getAllTodos() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                EventBus.getDefault().post(new onDataLoad(TodoApplication.getMyDatabase().todoDao().getAll()));
+            }
+        });
+    }
 
-  public void create(Todo todo) {
-    final Todo taskTodo = todo;
-    Runnable runnable = new Runnable() {
-      @Override
-      public void run() {
-        TodoApplication.getMyDatabase().todoDao().createTodoTask(taskTodo);
-      }
-    };
-    mHandler.post(runnable);
-  }
+    // Creates new todoitem in the database and posts an event
+    public void create(@NonNull final Todo todo) {
+        Preconditions.checkNotNull(todo);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                TodoApplication.getMyDatabase().todoDao().createTodoTask(todo);
+            }
+        });
+    }
 
-  public void update(Todo todo) {
-    final Todo taskTodo = todo;
-    Runnable runnable = new Runnable() {
-      @Override
-      public void run() {
-        TodoApplication.getMyDatabase().todoDao().createTodoTask(taskTodo);
-      }
-    };
-    mHandler.post(runnable);
-  }
+    // Updates todoitem in the database and posts an event
+    public void update(@NonNull final Todo todo) {
+        Preconditions.checkNotNull(todo);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                TodoApplication.getMyDatabase().todoDao().createTodoTask(todo);
+            }
+        });
+    }
 
-  public void delete(Todo todo) {
-    final Todo taskTodo = todo;
-    Runnable runnable = new Runnable() {
-      @Override
-      public void run() {
-        TodoApplication.getMyDatabase().todoDao().deleteTodoTask(taskTodo);
-      }
-    };
-    mHandler.post(runnable);
-  }
+    // Deletes todoitem in the database and posts an event
+    public void delete(@NonNull final Todo todo) {
+        Preconditions.checkNotNull(todo);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                TodoApplication.getMyDatabase().todoDao().deleteTodoTask(todo);
+            }
+        });
+    }
 }

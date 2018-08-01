@@ -1,14 +1,14 @@
 <resources>
-  <string name="app_name">Todo</string>
-  <string name="action_settings">Settings</string>
+    <string name="app_name">Todo</string>
+    <string name="action_settings">Settings</string>
 
-  <!--menu-->
-  <string name="delete">Delete</string>
-  <string name="save">Save</string>
+    <!--menu-->
+    <string name="delete">Delete</string>
+    <string name="save">Save</string>
 
-  <!--message-->
-  <string name="alert_to_save">Would you like to save?</string>
-  <string name="yes">Yes</string>
-  <string name="no">No</string>
+    <!--message-->
+    <string name="alert_to_save">Would you like to save?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
 </resources>

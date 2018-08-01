@@ -7,15 +7,18 @@ import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import java.util.List;
 
+/**
+ * Data Access Object for the Todotask
+ */
 @Dao
 public interface TodoDao {
 
-  @Query("SELECT * FROM Todo")
-  List<Todo> getAll();
+    @Query("SELECT * FROM Todo")
+    List<Todo> getAll();
 
-  @Delete
-  void deleteTodoTask(Todo todo);
+    @Delete
+    void deleteTodoTask(Todo todo);
 
-  @Insert(onConflict = OnConflictStrategy.REPLACE)
-  void createTodoTask(Todo todo);
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void createTodoTask(Todo todo);
 }
